@@ -15,6 +15,8 @@ from pyaadhaar.decode import AadhaarOldQr
 import base64
 from io import BytesIO
 from PIL import Image
+import re
+import shutil
 
 from config import MODEL_PATH,LABEL_PATH
 
@@ -44,18 +46,13 @@ def verify_aadhar():
     class_ids = []
     # checking the class_id
     if os.path.exists(LABEL_PATH):
-        txt_files = [file for file in os.listdir(LABEL_DIR) if file.endswith('.txt')]
+        txt_files = [os.path.join(LABEL_PATH, file) for file in os.listdir(LABEL_PATH) if file.endswith('.txt')]
         if len(txt_files)==1:
             label_file = txt_files[0]
             with open(label_file,'r') as f:
                 for line in f:
                     class_ids.append(line.split()[0])
-        
-        #Removing the ./runs/... directory
-        try:
-            os.rmdir(LABEL_PATH)
-        except OSError as e:
-            pass
+
     detects = []
     #Mapping classes
     if class_ids:
@@ -78,6 +75,22 @@ def verify_aadhar():
         isSecure, qr_data = data_from_QR(file_path)
     except qrcode.QRCodeDecodeError:
         qr_data = None
+
+    # Removing temporary files
+    #Removing the ./runs/... directory
+    try:
+        if os.path.exists('./runs') and os.path.isdir('./runs'):
+            shutil.rmtree('./runs')
+        
+        if os.path.exists('./temp/aadhar_img.jpg'):
+            os.remove('./temp/aadhar_img.jpg')
+
+        if os.path.exists('QR_img.png'):
+            os.remove('QR_img.png')
+    except OSError as e:
+        pass
+
+    
 
     # Return result
     return jsonify({
@@ -115,10 +128,10 @@ def data_from_QR(image_file_name):
   img = cv2.imread(image_file_name, cv2.IMREAD_GRAYSCALE)  # Read image as grayscale.
   img2 = cv2.resize(img, (img.shape[1]*2, img.shape[0]*2), interpolation=cv2.INTER_LANCZOS4)  # Resize by x2 using LANCZOS4 interpolation method.
 
-  cv2.imwrite('image2.png', img2)
+  cv2.imwrite('QR_img.png', img2)
 
   #qrData = Qr_img_to_text(image_file_name)
-  qrData = Qr_img_to_text('image2.png')
+  qrData = Qr_img_to_text('QR_img.png')
   #print(qrData)
   # print(qrData[0])
   isSecureQR = False
@@ -133,4 +146,5 @@ def data_from_QR(image_file_name):
   return isSecureQR,decoded_secure_qr_data
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
