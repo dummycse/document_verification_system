@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 
 import cv2
 import os
@@ -18,9 +18,14 @@ from PIL import Image
 import re
 import shutil
 
-from config import MODEL_PATH,LABEL_PATH
+MODEL_PATH = './temp/best.pt'
+LABEL_PATH = './runs/detect/predict/labels/'
 
 app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 # Load YOLO model
 model = YOLO(MODEL_PATH)
