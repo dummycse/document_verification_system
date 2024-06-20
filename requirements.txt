@@ -9,3 +9,4 @@ pyzbar
 requests
 torch
 ultralytics
+gunicorn
