@@ -99,7 +99,7 @@ def verify_aadhar():
 
     # Return result
     return jsonify({
-        "status": "valid" if isSecure and len(detects)==4 else "invalid",
+        "status": "valid" if (len(detects)==4 or len(detects)==3) else "invalid",
         "detects": detects,
         "extracted_text": text,
         "fields_from_text":fields_from_text,
@@ -130,25 +130,25 @@ def extract_fields_from_text(text):
     return fields
 
 def data_from_QR(image_file_name):
-  img = cv2.imread(image_file_name, cv2.IMREAD_GRAYSCALE)  # Read image as grayscale.
-  img2 = cv2.resize(img, (img.shape[1]*2, img.shape[0]*2), interpolation=cv2.INTER_LANCZOS4)  # Resize by x2 using LANCZOS4 interpolation method.
+    img = cv2.imread(image_file_name, cv2.IMREAD_GRAYSCALE)  # Read image as grayscale.
+    img2 = cv2.resize(img, (img.shape[1]*2, img.shape[0]*2), interpolation=cv2.INTER_LANCZOS4)  # Resize by x2 using LANCZOS4 interpolation method.
 
-  cv2.imwrite('QR_img.png', img2)
+    cv2.imwrite('QR_img.png', img2)
 
-  #qrData = Qr_img_to_text(image_file_name)
-  qrData = Qr_img_to_text('QR_img.png')
-  #print(qrData)
-  # print(qrData[0])
-  isSecureQR = False
-  decoded_secure_qr_data = None
-  if len(qrData) == 0:
-      print(" No QR Code Detected !!")
-  else:
-      isSecureQR = (isSecureQr(qrData[0]))
-      secure_qr = AadhaarSecureQr(int(qrData[0]))
-      decoded_secure_qr_data = secure_qr.decodeddata()
-      print(decoded_secure_qr_data)
-  return isSecureQR,decoded_secure_qr_data
+    #qrData = Qr_img_to_text(image_file_name)
+    qrData = Qr_img_to_text('QR_img.png')
+    #print(qrData)
+    # print(qrData[0])
+    isSecureQR = False
+    decoded_secure_qr_data = None
+    if len(qrData) == 0:
+        print(" No QR Code Detected !!")
+    else:
+        isSecureQR = (isSecureQr(qrData[0]))
+        secure_qr = AadhaarSecureQr(int(qrData[0]))
+        decoded_secure_qr_data = secure_qr.decodeddata()
+        print(decoded_secure_qr_data)
+    return isSecureQR,decoded_secure_qr_data
 
 if __name__ == "__main__":
     # app.run(debug=True)
